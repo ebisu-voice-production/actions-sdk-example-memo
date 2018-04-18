@@ -1,0 +1,9 @@
+*~
+*.swp
+node_modules
+.DS_Store
+action.json
+package-lock.json
+.firebaserc
+*.log
+creds.data
