@@ -7,7 +7,7 @@ const mainIntent = conv => {
     const keepingMessage = (list.length > 1 && `I remember ${list.length} things.`)
       || (list.length === 1 && `I remember one thing.`)
       '';
-    conv.ask(`Hey you're back! ${keepingMessage} What's up?`);
+    conv.ask(`Hey you're back! ${keepingMessage || ''} What's up?`);
   } else {
     conv.ask(`Welcome to memo application! What's up?`);
   }
