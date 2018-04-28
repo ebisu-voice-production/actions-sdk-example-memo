@@ -4,12 +4,12 @@ const app = require('actions-on-google').actionssdk();
 const mainIntent = conv => {
   if (conv.user.last && conv.user.last.seen) {
     const list = conv.user.storage.list || [];
-    const keepingMessage = (list.length > 1 && `I remember ${list.length} things.`)
-      || (list.length === 1 && `I remember one thing.`)
+    const keepingMessage = (list.length > 1 && `${list.length}個のメモを覚えてますよ。`)
+      || (list.length === 1 && `1個メモを記録しています。`)
       '';
-    conv.ask(`Hey you're back! ${keepingMessage || ''} What's up?`);
+    conv.ask(`おかえりなさい！${keepingMessage || ''}どうしましょう？メモを聞く場合は、メモ参照、メモする場合は、メモして、と言ってください。`);
   } else {
-    conv.ask(`Welcome to memo application! What's up?`);
+    conv.ask(`はじめまして！メモアプリへようこそ！どうしましょう？`);
   }
 };
 
@@ -21,35 +21,35 @@ const analyzeConversation = (conv, inputText) => {
     const list = storage.list || [];
     if (intent === 'NEED_TO_RECORD') {
       conv.user.storage.list = [...list, inputText];
-      return { intent: 'FINISH', output: `You said, ${inputText}. I will keep it in mind.` };
+      return { intent: 'FINISH', output: `${inputText}、ですね。覚えておきます。` };
     } else if (intent === 'PLAY') {
-      if (/repeat/.test(inputText)) {
-        return { intent: 'PLAY', output: `I said, ${list[0]}. Would you like to delete this?` };
-      } else if (/yes/.test(inputText)) {
+      if (/もう一度|繰り返して/.test(inputText)) {
+        return { intent: 'PLAY', output: `${list[0]}、と覚えていました。このメモを消してもいいですか？` };
+      } else if (/はい/.test(inputText)) {
         conv.user.storage.list = list.slice(1);
-        return { intent: 'FINISH', output: `Ok, I deleted the memo. Goodbye!` };
-      } else if (/no/.test(inputText)) {
-        return { intent: 'FINISH', output: `Ok, I continue to keep it in mind. Goodbye!` };
+        return { intent: 'FINISH', output: `メモを消去します！ではまた。` };
+      } else if (/いいえ/.test(inputText)) {
+        return { intent: 'FINISH', output: `まだ覚えておきますね。ではまた。` };
       }
       return {
         intent: 'PLAY',
         output:
-          'Sorry, I can not understand. Would you like to delete the memo? Please answer yes, no, or repeat.',
+          'ごめんなさいわからなかったです、このメモを消しますか？はい、か、いいえ、でこたえてください。',
       };
     }
   }
-  if (/bye/.test(inputText)) {
+  if (/ばいばい|バイバイ/.test(inputText)) {
     return { intent: 'FINISH', output: 'Goodbye!' };
-  } else if (/remind me/.test(inputText)) {
+  } else if (/メモ参照|メモ聞く/.test(inputText)) {
     const list = conv.user.storage.list;
     if (list && list.length > 0) {
       conv.data.intent = 'PLAY';
-      return { intent: 'PLAY', output: `You said, ${list[0]}. Would you like to delete this?` };
+      return { intent: 'PLAY', output: `${list[0]}、とのことです。消しますか？` };
     }
-    return { intent: 'FINISH', output: 'Sorry, I have not remind anything.' };
-  } else if (/keep in mind/.test(inputText)) {
+    return { intent: 'FINISH', output: 'すいません、何もメモはないようです。' };
+  } else if (/メモして|メモする/.test(inputText)) {
     conv.data.intent = 'NEED_TO_RECORD';
-    return { intent: 'NEED_TO_RECORD', output: 'Ok, What do you let me remember?' };
+    return { intent: 'NEED_TO_RECORD', output: '了解です、何をメモしましょう？' };
   }
   return { intent: 'UNKNOWN' };
 };
@@ -59,7 +59,7 @@ const subIntent = (conv, inputText) => {
   if (result.intent === 'FINISH') {
     conv.close(result.output);
   } else if (result.intent === 'UNKNOWN') {
-    conv.ask('Sorry, What do you want to do?');
+    conv.ask('よくわからんです、どうしましょう？メモ参照、メモして、などとお願いします。');
   } else {
     conv.ask(result.output);
   }
